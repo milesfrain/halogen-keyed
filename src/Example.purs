@@ -4,6 +4,7 @@ import Prelude
 import Data.Array ((..))
 import Data.Maybe (Maybe(..))
 import Effect.Class (class MonadEffect)
+import Effect.Class.Console (log)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
@@ -41,18 +42,22 @@ render state =
             [ show idx, show $ idx * 10 ]
   in
     HH.table
-      [ HP.classes [ B.table, B.tableSm, B.tableHover ]
-      , HE.onMouseLeave \_ -> Just (SetHover NoHover)
-      ]
+      [ HP.classes [ B.table, B.tableSm, B.tableHover ] ]
       [ HH.thead_
           [ HH.tr_
               $ map
                   (\str -> HH.th [ HP.classes [ B.colSm1 ] ] [ HH.text str ])
                   [ "id", "value" ]
           ]
-      , HH.tbody_ $ map mkRow state.entries
+      , HH.tbody
+          [ HE.onMouseLeave \_ -> Just (SetHover NoHover) ]
+          $ map mkRow state.entries
       ]
 
-handleAction ∷ forall o m. Action -> H.HalogenM State Action () o m Unit
+handleAction ∷ forall o m. MonadEffect m => Action -> H.HalogenM State Action () o m Unit
 handleAction = case _ of
-  SetHover h -> H.modify_ \st -> st { hover = h }
+  SetHover h -> do
+    log case h of
+      HoverRow i -> show i
+      NoHover -> "exit"
+    H.modify_ \st -> st { hover = h }
