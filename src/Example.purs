@@ -60,13 +60,13 @@ render state =
       [ HP.classes [ B.table, B.tableSm, B.tableHover ]
       , HE.onMouseLeave \_ -> Just (SetHover NoHover)
       ]
-      [ HH.tbody_
-          $ [ HH.tr_
-                $ map
-                    (\str -> HH.th [ HP.classes [ B.colSm1 ] ] [ HH.text str ])
-                    [ "id", "keyId" ]
-            ]
-          <> map mkRow state.entries
+      [ HH.thead_
+          [ HH.tr_
+              $ map
+                  (\str -> HH.th [ HP.classes [ B.colSm1 ] ] [ HH.text str ])
+                  [ "id", "keyId" ]
+          ]
+      , HH.tbody_ $ map mkRow state.entries
       ]
 
 handleAction ∷ forall o m. Action → H.HalogenM State Action () o m Unit
