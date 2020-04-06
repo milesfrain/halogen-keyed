@@ -22,7 +22,7 @@ type State
 data Action
   = SetHover HoverInfo
 
-component :: forall q i o m. H.Component HH.HTML q i o m
+component :: forall q i o m. MonadEffect m => H.Component HH.HTML q i o m
 component =
   H.mkComponent
     { initialState: const { hover: NoHover, entries: 1 .. 1000 }
