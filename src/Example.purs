@@ -40,7 +40,7 @@ render state =
           _ -> false
 
         highlight
-          | active = [ HP.classes [ B.tableActive ] ]
+          -- | active = [ HP.classes [ B.tableActive ] ]
           | otherwise = []
 
         keyId
@@ -57,7 +57,7 @@ render state =
               [ show idx, keyId ]
   in
     HH.table
-      [ HP.classes [ B.table, B.tableSm ]
+      [ HP.classes [ B.table, B.tableSm, B.tableHover ]
       , HE.onMouseLeave \_ -> Just (SetHover NoHover)
       ]
       $ [ HH.tr_
