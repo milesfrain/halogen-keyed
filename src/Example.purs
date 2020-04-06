@@ -3,10 +3,8 @@ module Example where
 import Prelude
 import Data.Array ((..))
 import Data.Maybe (Maybe(..))
-import Data.Tuple (Tuple(..))
 import Halogen as H
 import Halogen.HTML as HH
-import Halogen.HTML.Elements.Keyed as HK
 import Halogen.HTML.Events as HE
 import Halogen.Themes.Bootstrap4 as B
 import Halogen.HTML.Properties as HP
@@ -26,7 +24,7 @@ data Action
 component :: forall q i o m. H.Component HH.HTML q i o m
 component =
   H.mkComponent
-    { initialState: const { hover: NoHover, entries: 1 .. 100 }
+    { initialState: const { hover: NoHover, entries: 1 .. 1000 }
     , render
     , eval: H.mkEval $ H.defaultEval { handleAction = handleAction }
     }
@@ -49,22 +47,20 @@ render state =
           | active = show idx <> "-active"
           | otherwise = show idx
       in
-        Tuple keyId
-          $ HH.tr
-              ( [ HE.onMouseEnter \_ -> Just (SetHover (HoverRow idx))
-                ]
-                  <> highlight
-              )
+        HH.tr
+          ( [ HE.onMouseEnter \_ -> Just (SetHover (HoverRow idx))
+            ]
+              <> highlight
+          )
           $ map
               (\str -> HH.td_ [ HH.text str ])
               [ show idx, keyId ]
   in
-    HK.table
+    HH.table
       [ HP.classes [ B.table, B.tableSm ]
       , HE.onMouseLeave \_ -> Just (SetHover NoHover)
       ]
-      $ [ Tuple "header"
-            $ HH.tr_
+      $ [ HH.tr_
             $ map
                 (\str -> HH.th [ HP.classes [ B.colSm1 ] ] [ HH.text str ])
                 [ "id", "keyId" ]
