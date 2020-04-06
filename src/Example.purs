@@ -3,11 +3,12 @@ module Example where
 import Prelude
 import Data.Array ((..))
 import Data.Maybe (Maybe(..))
+import Effect.Class (class MonadEffect)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
-import Halogen.Themes.Bootstrap4 as B
 import Halogen.HTML.Properties as HP
+import Halogen.Themes.Bootstrap4 as B
 
 data HoverInfo
   = HoverRow Int
@@ -33,28 +34,11 @@ render :: forall m. State -> H.ComponentHTML Action () m
 render state =
   let
     mkRow idx =
-      let
-        active = case state.hover of
-          HoverRow i
-            | i == idx -> true
-          _ -> false
-
-        highlight
-          -- | active = [ HP.classes [ B.tableActive ] ]
-          | otherwise = []
-
-        keyId
-          | active = show idx <> "-active"
-          | otherwise = show idx
-      in
-        HH.tr
-          ( [ HE.onMouseEnter \_ -> Just (SetHover (HoverRow idx))
-            ]
-              <> highlight
-          )
-          $ map
-              (\str -> HH.td_ [ HH.text str ])
-              [ show idx, keyId ]
+      HH.tr
+        [ HE.onMouseEnter \_ -> Just (SetHover (HoverRow idx)) ]
+        $ map
+            (\str -> HH.td_ [ HH.text str ])
+            [ show idx, show $ idx * 10 ]
   in
     HH.table
       [ HP.classes [ B.table, B.tableSm, B.tableHover ]
@@ -64,11 +48,11 @@ render state =
           [ HH.tr_
               $ map
                   (\str -> HH.th [ HP.classes [ B.colSm1 ] ] [ HH.text str ])
-                  [ "id", "keyId" ]
+                  [ "id", "value" ]
           ]
       , HH.tbody_ $ map mkRow state.entries
       ]
 
-handleAction ∷ forall o m. Action → H.HalogenM State Action () o m Unit
+handleAction ∷ forall o m. Action -> H.HalogenM State Action () o m Unit
 handleAction = case _ of
   SetHover h -> H.modify_ \st -> st { hover = h }
