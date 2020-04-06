@@ -33,9 +33,11 @@ render state =
     HH.table
       [ HP.classes [ B.table, B.tableSm, B.tableHover ]
       ]
-      $ [ HH.tr_
-            $ map
-                (\str -> HH.th_ [ HH.text str ])
-                [ "id", "value" ]
-        ]
-      <> map mkRow state.entries
+      [ HH.tbody_
+          $ [ HH.tr_
+                $ map
+                    (\str -> HH.th_ [ HH.text str ])
+                    [ "id", "value" ]
+            ]
+          <> map mkRow state.entries
+      ]
