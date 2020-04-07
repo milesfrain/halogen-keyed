@@ -8,6 +8,7 @@ You can edit this file as you like.
   , "effect"
   , "halogen"
   , "halogen-bootstrap4"
+  , "halogen-hooks"
   , "psci-support"
   ]
 , packages = ./packages.dhall

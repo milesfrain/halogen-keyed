@@ -123,6 +123,12 @@ let upstream =
 
 let overrides = {=}
 
-let additions = {=}
+let additions =
+  { halogen-hooks =
+      { dependencies = [ "halogen", "indexed-monad" ]
+      , repo = "https://github.com/thomashoneyman/purescript-halogen-hooks.git"
+      , version = "master"
+      }
+  }
 
 in  upstream // overrides // additions
