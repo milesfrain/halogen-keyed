@@ -3,11 +3,13 @@ module Example where
 import Prelude
 import Data.Array ((..))
 import Data.Maybe (Maybe(..))
+import Data.Tuple (Tuple(..))
 import Data.Tuple.Nested ((/\))
 import Effect.Class (class MonadEffect)
 import Effect.Class.Console (log)
 import Halogen as H
 import Halogen.HTML as HH
+import Halogen.HTML.Elements.Keyed as HK
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Halogen.Hooks as Hooks
@@ -33,23 +35,27 @@ tableHooks =
         hovTxt = case hover of
           HoverRow i -> show i
           NoHover -> "Not hovering"
-      HH.div [ HP.class_ B.col ]
-        [ HH.div_ [ HH.text hovTxt ]
-        , HH.table
-            [ HP.classes [ B.table, B.tableSm, B.tableHover ] ]
-            [ HH.thead_
-                [ HH.tr_
-                    $ map
-                        (\str -> HH.th [ HP.classes [ B.colSm1 ] ] [ HH.text str ])
-                        [ "id", "value" ]
+      HK.div [ HP.class_ B.col ]
+        [ Tuple hovTxt
+            $ HH.div_
+                [ HH.text hovTxt
                 ]
-            , HH.tbody
-                [ HE.onMouseLeave \_ -> --do
-                    --log $ "exit"
-                    Just $ Hooks.put hoverState NoHover
+        , Tuple "same"
+            $ HH.table
+                [ HP.classes [ B.table, B.tableSm, B.tableHover ] ]
+                [ HH.thead_
+                    [ HH.tr_
+                        $ map
+                            (\str -> HH.th [ HP.classes [ B.colSm1 ] ] [ HH.text str ])
+                            [ "id", "value" ]
+                    ]
+                , HH.tbody
+                    [ HE.onMouseLeave \_ -> --do
+                        --log $ "exit"
+                        Just $ Hooks.put hoverState NoHover
+                    ]
+                    $ map mkRow entries
                 ]
-                $ map mkRow entries
-            ]
         ]
 
 data HoverInfo
