@@ -40,18 +40,25 @@ render state =
         $ map
             (\str -> HH.td_ [ HH.text str ])
             [ show idx, show $ idx * 10 ]
+
+    hovTxt = case state.hover of
+      HoverRow i -> show i
+      NoHover -> "Not hovering"
   in
-    HH.table
-      [ HP.classes [ B.table, B.tableSm, B.tableHover ] ]
-      [ HH.thead_
-          [ HH.tr_
-              $ map
-                  (\str -> HH.th [ HP.classes [ B.colSm1 ] ] [ HH.text str ])
-                  [ "id", "value" ]
+    HH.div [ HP.class_ B.col ]
+      [ HH.div_ [ HH.text hovTxt ]
+      , HH.table
+          [ HP.classes [ B.table, B.tableSm, B.tableHover ] ]
+          [ HH.thead_
+              [ HH.tr_
+                  $ map
+                      (\str -> HH.th [ HP.classes [ B.colSm1 ] ] [ HH.text str ])
+                      [ "id", "value" ]
+              ]
+          , HH.tbody
+              [ HE.onMouseLeave \_ -> Just (SetHover NoHover) ]
+              $ map mkRow state.entries
           ]
-      , HH.tbody
-          [ HE.onMouseLeave \_ -> Just (SetHover NoHover) ]
-          $ map mkRow state.entries
       ]
 
 handleAction ∷ forall o m. MonadEffect m => Action -> H.HalogenM State Action () o m Unit
