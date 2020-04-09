@@ -1,7 +1,6 @@
 module Table where
 
 import Prelude
-import Data.Array (filter, snoc, sort)
 import Data.Const (Const)
 import Data.Maybe (Maybe(..))
 import Effect.Class (class MonadEffect)
@@ -10,6 +9,7 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Halogen.Themes.Bootstrap4 as B
+import Unsafe.Reference (unsafeRefEq)
 
 data HoverInfo
   = HoverRow Int
@@ -28,7 +28,7 @@ type Input
   = Entries
 
 type State
-  = Entries
+  = { entries :: Entries }
 
 data Action
   = HandleInput Input
@@ -37,7 +37,7 @@ data Action
 component :: forall q m. MonadEffect m => H.Component HH.HTML q Input Message m
 component =
   H.mkComponent
-    { initialState: identity
+    { initialState: { entries: _ }
     , render
     , eval:
         H.mkEval
@@ -67,20 +67,13 @@ render state =
           ]
       , HH.tbody
           [ HE.onMouseLeave \_ -> Just (SetHover NoHover) ]
-          $ map mkRow state
+          $ map mkRow state.entries
       ]
 
 handleAction :: forall m. MonadEffect m => Action -> H.HalogenM State Action () Message m Unit
 handleAction = case _ of
-  HandleInput entries ->
-    -- No re-render
-    H.put entries
-    --H.put $ entries <> []
-    --H.put $ identity entries
-
-    -- Triggers re-render
-    --H.put $ sort entries
-    --H.put $ filter (const true) entries
-    --H.put $ map identity entries
+  HandleInput entries -> do
+    old <- H.get
+    unless (unsafeRefEq old.entries entries) $ H.put { entries }
   SetHover h -> do
     H.raise (MessageHover h)
