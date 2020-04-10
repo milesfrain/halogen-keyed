@@ -34,32 +34,37 @@ component =
 render :: forall m. State -> H.ComponentHTML Action () m
 render state =
   let
-    mkRow idx =
-      HH.tr
-        [ HE.onMouseEnter \_ -> Just (SetHover (HoverRow idx)) ]
-        $ map
-            (\str -> HH.td_ [ HH.text str ])
-            [ show idx, show $ idx * 10 ]
-
     hovTxt = case state.hover of
       HoverRow i -> show i
       NoHover -> "Not hovering"
   in
     HH.div [ HP.class_ B.col ]
       [ HH.div_ [ HH.text hovTxt ]
-      , HH.table
-          [ HP.classes [ B.table, B.tableSm, B.tableHover ] ]
-          [ HH.thead_
-              [ HH.tr_
-                  $ map
-                      (\str -> HH.th [ HP.classes [ B.colSm1 ] ] [ HH.text str ])
-                      [ "id", "value" ]
-              ]
-          , HH.tbody
-              [ HE.onMouseLeave \_ -> Just (SetHover NoHover) ]
-              $ map mkRow state.entries
-          ]
+      , HH.lazy mkTable state.entries
       ]
+
+mkRow :: forall a. Int -> HH.HTML a Action
+mkRow idx =
+  HH.tr
+    [ HE.onMouseEnter \_ -> Just (SetHover (HoverRow idx)) ]
+    $ map
+        (\str -> HH.td_ [ HH.text str ])
+        [ show idx, show $ idx * 10 ]
+
+mkTable :: forall a. Array Int -> HH.HTML a Action
+mkTable entries =
+  HH.table
+    [ HP.classes [ B.table, B.tableSm, B.tableHover ] ]
+    [ HH.thead_
+        [ HH.tr_
+            $ map
+                (\str -> HH.th [ HP.classes [ B.colSm1 ] ] [ HH.text str ])
+                [ "id", "value" ]
+        ]
+    , HH.tbody
+        [ HE.onMouseLeave \_ -> Just (SetHover NoHover) ]
+        $ map mkRow entries
+    ]
 
 handleAction ∷ forall o m. MonadEffect m => Action -> H.HalogenM State Action () o m Unit
 handleAction = case _ of
