@@ -3,10 +3,12 @@ module Example where
 import Prelude
 import Data.Array ((..))
 import Data.Maybe (Maybe(..))
+import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect)
 import Effect.Class.Console (log)
 import Halogen as H
 import Halogen.HTML as HH
+import Halogen.HTML.Elements.Keyed as HK
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Halogen.Themes.Bootstrap4 as B
@@ -45,17 +47,22 @@ render state =
       , mkTable state.hover state.entries
       ]
 
-mkRow :: forall a. HoverInfo -> Int -> HH.HTML a Action
+mkRow :: forall a. HoverInfo -> Int -> Tuple String (HH.HTML a Action)
 mkRow hov idx =
   let
-    active
-      | hov == HoverRow idx = [ B.tableActive ]
-      | otherwise = []
+    idxStr = show idx
+
+    t
+      | hov == HoverRow idx = Tuple (idxStr <> "h") [ B.tableActive ]
+      | otherwise = Tuple idxStr []
+
+    Tuple key active = t
   in
-    HH.tr
-      [ HP.classes active
-      , HE.onMouseEnter \_ -> Just (SetHover (HoverRow idx))
-      ]
+    Tuple key
+      $ HH.tr
+          [ HP.classes active
+          , HE.onMouseEnter \_ -> Just (SetHover (HoverRow idx))
+          ]
       $ map
           (\str -> HH.td_ [ HH.text str ])
           [ show idx, show $ idx * 10 ]
@@ -70,7 +77,7 @@ mkTable hov entries =
                 (\str -> HH.th [ HP.classes [ B.colSm1 ] ] [ HH.text str ])
                 [ "id", "value" ]
         ]
-    , HH.tbody
+    , HK.tbody
         [ HE.onMouseLeave \_ -> Just (SetHover NoHover) ]
         $ map (mkRow hov) entries
     ]
