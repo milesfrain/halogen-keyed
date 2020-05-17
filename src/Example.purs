@@ -15,6 +15,8 @@ data HoverInfo
   = HoverRow Int
   | NoHover
 
+derive instance eqHoverInfo :: Eq HoverInfo
+
 type State
   = { hover :: HoverInfo
     , entries :: Array Int
@@ -40,21 +42,28 @@ render state =
   in
     HH.div [ HP.class_ B.col ]
       [ HH.div_ [ HH.text hovTxt ]
-      , mkTable state.entries
+      , mkTable state.hover state.entries
       ]
 
-mkRow :: forall a. Int -> HH.HTML a Action
-mkRow idx =
-  HH.tr
-    [ HE.onMouseEnter \_ -> Just (SetHover (HoverRow idx)) ]
-    $ map
-        (\str -> HH.td_ [ HH.text str ])
-        [ show idx, show $ idx * 10 ]
+mkRow :: forall a. HoverInfo -> Int -> HH.HTML a Action
+mkRow hov idx =
+  let
+    active
+      | hov == HoverRow idx = [ B.tableActive ]
+      | otherwise = []
+  in
+    HH.tr
+      [ HP.classes active
+      , HE.onMouseEnter \_ -> Just (SetHover (HoverRow idx))
+      ]
+      $ map
+          (\str -> HH.td_ [ HH.text str ])
+          [ show idx, show $ idx * 10 ]
 
-mkTable :: forall a. Array Int -> HH.HTML a Action
-mkTable entries =
+mkTable :: forall a. HoverInfo -> Array Int -> HH.HTML a Action
+mkTable hov entries =
   HH.table
-    [ HP.classes [ B.table, B.tableSm, B.tableHover ] ]
+    [ HP.classes [ B.table, B.tableSm ] ]
     [ HH.thead_
         [ HH.tr_
             $ map
@@ -63,7 +72,7 @@ mkTable entries =
         ]
     , HH.tbody
         [ HE.onMouseLeave \_ -> Just (SetHover NoHover) ]
-        $ map mkRow entries
+        $ map (mkRow hov) entries
     ]
 
 handleAction ∷ forall o m. MonadEffect m => Action -> H.HalogenM State Action () o m Unit
